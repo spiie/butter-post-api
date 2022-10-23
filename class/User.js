@@ -1,82 +1,46 @@
-const fs = require("fs")
-
 class User {
-  constructor(uid, username, email, password) {
-    this.uid = uid
+  constructor(username, email, password) {
     this.username = username
     this.email = email
     this.password = password
   }
 
-  static fetchData() {
-    const userData = fs.readFileSync("./data/users.json", { encoding: 'utf8' })
-    let userDataJson = JSON.parse(userData)
-    return userDataJson
+  static checkUsernameValidity(db, reqUsername) {
+    return db.checkUserThings("username", reqUsername)
   }
 
-  updateUser() {
-    let userData = User.fetchData()
-    userData[this.uid.toString()] = this.toJson()
-
-    fs.writeFileSync("./data/users.json", JSON.stringify(userData), { encoding: 'utf8' })
-  }
-
-  static checkThing(type, reqValue) {
-    let isValid
-    Object.entries(User.fetchData()).forEach(entire => {
-      const [uid, user] = entrie
-      if (type === "email") {
-        if (user.email === reqValue) return isValid = false
-      } else if (type === "username") {
-        if (user.username === reqValue) return isValid = false
-      }
-    })
-    return isValid === false ? false : true
-  }
-
-  static checkUsernameValidity(reqUsername) {
-    return User.checkThing("username", reqUsername)
-  }
-
-  static checkEmailValidity(reqEmail) {
+  static checkEmailValidity(db, reqEmail) {
     // eslint-disable-next-line
     const validRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    console.log(validRegex.test(email_loc));
-    if (validRegex.test(email_loc)) {
-      return User.checkThing("emal", reqEmail)
+    if (validRegex.test(reqEmail)) {
+      return db.checkUserThings("email", reqUsername)
     } else {
       return false
     }
   }
 
-  registerUser() {
-    this.updateUser()
+  registerUser(db) {
+    db.createUser(this.username, this.email, this.password)
   }
 
-  static loginUser(email, password) {
-    let isValid
-    Object.entries(User.fetchData()).forEach(entrie => {
-      const [uid, user] = entrie
-      if (user.email === email && user.password === password) return isValid = true
-    })
-    return isValid === true ? true : false
+  static loginUser(db, email, password) {
+    return db.checkUserLogin(email, password)
   }
 
-  changeUsername(newUsername) {
-    if (User.checkUsernameValidity("username", newUsername) === true) this.username = newUsername
+  changeUsername(db, newUsername) {
+    if (User.checkUsernameValidity(db, "username", newUsername) === true) this.username = newUsername
   }
 
-  changeEmail(newEmail) {
-    if (User.checkEmailValidity("email", newEmail) === true) this.email = newEmail
+  changeEmail(db, newEmail) {
+    if (User.checkEmailValidity(db, "email", newEmail) === true) this.email = newEmail
   }
 
-  static getUser(reqUid) {
-    return User.fetchData()[reqUid.toString()]
+  static getUser(db, reqUid) {
+    return db.getUser(reqUid)
   }
 
   toJson() {
     return {
-      uid: this.uid,
       username: this.username,
       email: this.email,
       password: this.password,
