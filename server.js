@@ -38,4 +38,4 @@ app.use('/api/login', async (req, res) => {
   res.end()
 })
 
-app.listen(port, () => console.log(`Api status : ON (${port})`))
+app.listen()
